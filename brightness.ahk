@@ -1,18 +1,3 @@
-#W::
-	KeyWait LShift
-	Send !{F4}
-	Return
-
-#Enter::
-	KeyWait Enter
-	Run C:\softwares\conemu\conemu64.exe
-	Return
-
-#N::
-	KeyWait N
-	Run notepad
-	Return
-
 #,::
   AdjustScreenBrightness(-3)
   Return
