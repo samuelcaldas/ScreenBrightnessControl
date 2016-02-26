@@ -1,4 +1,3 @@
-/* Please give me a star if you find it helpful */
 #W::
 	KeyWait LShift
 	Send !{F4}
@@ -26,7 +25,7 @@ AdjustScreenBrightness(step) {
     service := "winmgmts:{impersonationLevel=impersonate}!\\.\root\WMI"
     monitors := ComObjGet(service).ExecQuery("SELECT * FROM WmiMonitorBrightness WHERE Active=TRUE")
     monMethods := ComObjGet(service).ExecQuery("SELECT * FROM wmiMonitorBrightNessMethods WHERE Active=TRUE")
-    minBrightness := 5  /* level below this is identical to this */
+    minBrightness := 5  ; level below this is identical to this
 
     for i in monitors {
         curt := i.CurrentBrightness
@@ -35,7 +34,7 @@ AdjustScreenBrightness(step) {
     toSet := curt + step
     if (toSet < 0 or toSet > 100)
         return
-    if (toSet < minBrightness)  /* parenthesis is necessary */
+    if (toSet < minBrightness)  ; parenthesis is necessary here
         toSet := minBrightness
 
     for i in monMethods {
