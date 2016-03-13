@@ -16,11 +16,15 @@ AdjustScreenBrightness(step) {
         curt := i.CurrentBrightness
         break
     }
+    if (curt < minBrightness)  ; parenthesis is necessary here
+        curt := minBrightness
     toSet := curt + step
-    if (toSet < 0 or toSet > 100)
+    if (toSet > 100)
         return
-    if (toSet < minBrightness)  ; parenthesis is necessary here
+    if (toSet < minBrightness)
         toSet := minBrightness
+        
+    
 
     for i in monMethods {
         i.WmiSetBrightness(1, toSet)
