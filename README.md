@@ -1,4 +1,4 @@
-# brightness.ahk
+# ScreenBrightnessControl
 
 This is a simple script that allows you to adjust the brightness of your screen using keyboard shortcuts. It uses AutoHotkey, a free and open-source scripting language for Windows.
 
