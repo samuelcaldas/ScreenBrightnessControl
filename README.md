@@ -1,10 +1,10 @@
 # ScreenBrightnessControl
 
-ScreenBrightnessControl is an AutoHotkey v1 script for changing a Windows laptop's internal display brightness through WMI. It provides configurable fine and coarse adjustments plus direct minimum and maximum shortcuts.
+ScreenBrightnessControl is an AutoHotkey v2 script for changing a Windows laptop's internal display brightness through WMI. It provides configurable fine and coarse adjustments plus direct minimum and maximum shortcuts.
 
 ## Requirements and installation
 
-Install [AutoHotkey v1.1.33 or later](https://www.autohotkey.com/), then clone or download this repository. Start the script by double-clicking `brightness.ahk` or running:
+Install [AutoHotkey v2.0 or later](https://www.autohotkey.com/), then clone or download this repository. Start the script by double-clicking `brightness.ahk` or running:
 
 ```powershell
 AutoHotkey.exe brightness.ahk
@@ -43,7 +43,7 @@ Brightness limits must be integers satisfying `0 <= Minimum < Maximum <= 100`; s
 
 ## Compatibility and verification
 
-The script controls the first active internal display exposed by Windows WMI. External monitors that require DDC/CI may not work. After changing the script or configuration, manually verify all six shortcuts, discrete-level stepping in both directions, both boundaries, repeated key presses, on-screen feedback, and an external brightness change between shortcuts.
+The script controls the first active internal display exposed by Windows WMI. External monitors that require DDC/CI may not work. After changing the script or configuration, validate its syntax with `AutoHotkey.exe /validate brightness.ahk`, then manually verify all six shortcuts, discrete-level stepping in both directions, both boundaries, repeated key presses, on-screen feedback, and an external brightness change between shortcuts.
 
 ## License
 

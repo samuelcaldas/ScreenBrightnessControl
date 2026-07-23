@@ -15,7 +15,7 @@ load_configuration() {
 }
 
 read_ini_value(file_path, section_name, key_name, default_value) {
-    IniRead, configured_value, %file_path%, %section_name%, %key_name%, %default_value%
+    configured_value := IniRead(file_path, section_name, key_name, default_value)
     return Trim(configured_value)
 }
 
@@ -34,36 +34,36 @@ normalize_numeric_configuration(configuration) {
 
 require_integer(configured_value, setting_name) {
     if !RegExMatch(configured_value, "^-?\d+$")
-        throw Exception(setting_name . " must be an integer.")
+        throw Error(setting_name . " must be an integer.")
     return configured_value + 0
 }
 
 validate_brightness_ranges(configuration) {
     if (configuration.minimum < 0 || configuration.minimum >= configuration.maximum)
-        throw Exception("Minimum must be between 0 and Maximum - 1.")
+        throw Error("Minimum must be between 0 and Maximum - 1.")
     if (configuration.maximum > 100)
-        throw Exception("Maximum must not exceed 100.")
+        throw Error("Maximum must not exceed 100.")
     if (configuration.fine_step <= 0 || configuration.coarse_step <= 0)
-        throw Exception("Brightness steps must be positive integers.")
+        throw Error("Brightness steps must be positive integers.")
 }
 
 validate_distinct_hotkeys(definitions) {
-    normalized_hotkeys := {}
-    for definition_index, definition in definitions {
+    normalized_hotkeys := Map()
+    for definition in definitions {
         if (definition.key = "")
-            throw Exception("Hotkeys must not be empty.")
+            throw Error("Hotkeys must not be empty.")
         normalized_hotkey := normalize_hotkey(definition.key)
-        if normalized_hotkeys.HasKey(normalized_hotkey)
-            throw Exception("Hotkeys must be distinct: " . definition.key)
+        if normalized_hotkeys.Has(normalized_hotkey)
+            throw Error("Hotkeys must be distinct: " . definition.key)
         normalized_hotkeys[normalized_hotkey] := true
     }
 }
 
 normalize_hotkey(hotkey) {
-    StringLower, remaining_hotkey, hotkey
+    remaining_hotkey := StrLower(hotkey)
     remaining_hotkey := StrReplace(StrReplace(remaining_hotkey, "~"), "$")
     normalized_hotkey := ""
-    for modifier_index, modifier in ["*", "#", "^", "!", "+"] {
+    for modifier in ["*", "#", "^", "!", "+"] {
         if !InStr(remaining_hotkey, modifier)
             continue
         normalized_hotkey .= modifier
@@ -73,43 +73,40 @@ normalize_hotkey(hotkey) {
 }
 
 create_hotkey_definitions(configuration) {
-    return [{key: configuration.fine_decrease, kind: "relative", value: -configuration.fine_step}
-        , {key: configuration.fine_increase, kind: "relative", value: configuration.fine_step}
-        , {key: configuration.coarse_decrease, kind: "relative", value: -configuration.coarse_step}
-        , {key: configuration.coarse_increase, kind: "relative", value: configuration.coarse_step}
-        , {key: configuration.set_minimum, kind: "absolute", value: configuration.minimum}
-        , {key: configuration.set_maximum, kind: "absolute", value: configuration.maximum}]
+    return [
+        {key: configuration.fine_decrease, kind: "relative", value: -configuration.fine_step},
+        {key: configuration.fine_increase, kind: "relative", value: configuration.fine_step},
+        {key: configuration.coarse_decrease, kind: "relative", value: -configuration.coarse_step},
+        {key: configuration.coarse_increase, kind: "relative", value: configuration.coarse_step},
+        {key: configuration.set_minimum, kind: "absolute", value: configuration.minimum},
+        {key: configuration.set_maximum, kind: "absolute", value: configuration.maximum}
+    ]
 }
 
 register_hotkeys(configuration) {
     hotkey_registrations := []
     try {
-        for definition_index, definition in create_hotkey_definitions(configuration)
+        for definition in create_hotkey_definitions(configuration)
             hotkey_registrations.Push(stage_hotkey(configuration, definition))
         enable_hotkeys(hotkey_registrations)
-    } catch registration_error {
+    } catch Error as registration_error {
         disable_hotkeys(hotkey_registrations)
-        throw registration_error
+        throw
     }
 }
 
 stage_hotkey(configuration, definition) {
-    hotkey_handler := Func("handle_brightness_action").Bind(configuration, definition)
-    Hotkey, % definition.key, % hotkey_handler, Off UseErrorLevel
-    if ErrorLevel
-        throw Exception("Invalid hotkey " . definition.key . " (error " . ErrorLevel . ").")
+    hotkey_handler := handle_brightness_action.Bind(configuration, definition)
+    Hotkey(definition.key, hotkey_handler, "Off")
     return {key: definition.key, handler: hotkey_handler}
 }
 
 enable_hotkeys(hotkey_registrations) {
-    for registration_index, hotkey_registration in hotkey_registrations {
-        Hotkey, % hotkey_registration.key, On, UseErrorLevel
-        if ErrorLevel
-            throw Exception("Unable to enable hotkey " . hotkey_registration.key . ".")
-    }
+    for hotkey_registration in hotkey_registrations
+        Hotkey(hotkey_registration.key, "On")
 }
 
 disable_hotkeys(hotkey_registrations) {
-    for registration_index, hotkey_registration in hotkey_registrations
-        Hotkey, % hotkey_registration.key, Off, UseErrorLevel
+    for hotkey_registration in hotkey_registrations
+        Hotkey(hotkey_registration.key, "Off")
 }
