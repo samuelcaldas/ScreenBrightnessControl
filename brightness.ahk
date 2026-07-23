@@ -118,15 +118,10 @@ is_better_candidate(selection, supported_level, candidate_distance, direction) {
 }
 
 set_brightness(brightness_method, target_brightness) {
-    method_definition := brightness_method.Methods_("WmiSetBrightness")
-    input_definition := method_definition.InParameters
-    input_parameters := input_definition.SpawnInstance_()
-    input_parameters.Timeout := 0
-    input_parameters.Brightness := target_brightness
-    output_parameters := brightness_method.ExecMethod_("WmiSetBrightness", input_parameters)
-    output_properties := output_parameters.Properties_
-    result_property := output_properties.Item("ReturnValue")
-    wmi_result_code := result_property.Value
+    wmi_result_code := brightness_method.WmiSetBrightness(0, target_brightness)
+    ; Some WMI providers apply brightness without exposing a method status through AutoHotkey.
+    if (wmi_result_code = "")
+        return
     if !IsInteger(wmi_result_code)
         throw Error("WMI returned an invalid status after setting brightness " . target_brightness . ".")
     if (wmi_result_code != 0)
